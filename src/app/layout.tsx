@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Fraunces, Geist_Mono, Inter, Poppins } from "next/font/google";
 
+import { Providers } from "@/components/site/providers";
 import { Toaster } from "@/components/ui/sonner";
 import { SITE } from "@/lib/constants";
 import { getSiteSettings } from "@/lib/queries";
@@ -71,8 +72,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${inter.variable} ${fraunces.variable} ${geistMono.variable} ${poppins.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
-        {children}
-        <Toaster position="top-center" richColors />
+        <Providers>
+          {children}
+          <Toaster position="top-center" richColors />
+        </Providers>
       </body>
     </html>
   );

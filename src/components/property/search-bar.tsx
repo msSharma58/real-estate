@@ -54,7 +54,7 @@ export function SearchBar({ className }: { className?: string }) {
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search by area, city or landmark…"
             aria-label="Search properties"
-            className="w-full bg-transparent text-[0.9375rem] text-ink outline-none placeholder:text-ink-muted/70"
+            className="w-full bg-transparent text-[0.9375rem] text-ink outline-none placeholder:text-ink-muted"
           />
         </div>
 

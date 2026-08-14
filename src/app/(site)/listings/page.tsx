@@ -5,6 +5,7 @@ import {
   FiltersDrawer,
   FiltersSidebar,
   ListingSearch,
+  ResultsStatus,
   SortSelect,
 } from "@/components/property/filters-panel";
 import { PropertyGrid } from "@/components/property/property-grid";
@@ -129,7 +130,7 @@ export default async function ListingsPage({ searchParams }: PageProps<"/listing
   const filters = parseFilters(params);
 
   return (
-    <div className="pt-18">
+    <div className="pt-[var(--header-h)]">
       <header className="border-b border-border bg-muted/40">
         <div className="mx-auto max-w-7xl px-5 py-14 sm:px-8">
           <p className="eyebrow">Listings</p>
@@ -150,6 +151,12 @@ export default async function ListingsPage({ searchParams }: PageProps<"/listing
         </Suspense>
 
         <div className="min-w-0 flex-1">
+          {/* Outside the keyed boundary below, so the live region survives the
+              swap it is reporting on. */}
+          <Suspense fallback={null}>
+            <ResultsStatus />
+          </Suspense>
+
           <Suspense key={JSON.stringify(params)} fallback={<ResultsSkeleton />}>
             <Results params={params} />
           </Suspense>

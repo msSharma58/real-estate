@@ -5,6 +5,12 @@ import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Expand, ImageOff, X } from "lucide-react";
 
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { storageUrl } from "@/lib/supabase/env";
 import type { PropertyImageRow } from "@/lib/database.types";
 import { cn } from "@/lib/utils";
@@ -30,20 +36,24 @@ export function Gallery({
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (e.key === "ArrowRight") go(1);
-      if (e.key === "ArrowLeft") go(-1);
-      if (e.key === "Escape") setLightbox(false);
+      if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+
+      // The enquiry form sits beside the gallery on a property page. Without
+      // this guard, moving the caret in "Your name" also flipped the photo.
+      const el = e.target as HTMLElement | null;
+      if (
+        el?.isContentEditable ||
+        (el && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) ||
+        el?.closest("[role='listbox'],[role='menu'],[role='combobox']")
+      ) {
+        return;
+      }
+
+      go(e.key === "ArrowRight" ? 1 : -1);
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [go]);
-
-  useEffect(() => {
-    document.body.style.overflow = lightbox ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [lightbox]);
 
   if (count === 0) {
     return (
@@ -96,7 +106,7 @@ export function Gallery({
             type="button"
             onClick={() => setLightbox(true)}
             aria-label="View full size"
-            className="absolute right-4 top-4 grid size-10 place-items-center rounded-full bg-black/45 text-white backdrop-blur transition-opacity duration-300 hover:bg-black/65 focus-visible:opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+            className="absolute right-4 top-4 grid size-11 place-items-center rounded-full bg-black/45 text-white backdrop-blur transition-opacity duration-300 hover:bg-black/65 focus-visible:opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
           >
             <Expand className="size-4" />
           </button>
@@ -140,27 +150,31 @@ export function Gallery({
         )}
       </div>
 
-      <AnimatePresence>
-        {lightbox && src && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            role="dialog"
-            aria-modal="true"
-            aria-label={`${title} — photo viewer`}
-            className="fixed inset-0 z-[90] flex items-center justify-center bg-black/92 p-4"
-            onClick={() => setLightbox(false)}
-          >
+      {/* Radix owns the shell: focus moves in, Tab stays inside, Escape closes,
+          the page behind goes inert, and focus returns to the expand button. */}
+      <Dialog open={lightbox} onOpenChange={setLightbox}>
+        <DialogContent
+          showCloseButton={false}
+          aria-describedby={undefined}
+          overlayClassName="z-[90] bg-black/70"
+          className="z-[90] grid h-full max-h-none w-full max-w-none translate-x-0 translate-y-0 place-items-center rounded-none bg-black/92 p-4 ring-0 inset-0 top-0 left-0"
+          onClick={() => setLightbox(false)}
+        >
+          <DialogTitle className="sr-only">
+            {title} — photo {index + 1} of {count}
+          </DialogTitle>
+
+          <DialogClose asChild>
             <button
               type="button"
-              aria-label="Close"
+              aria-label="Close photo viewer"
               className="absolute right-5 top-5 grid size-11 place-items-center rounded-full text-white/70 transition-colors hover:bg-white/10 hover:text-white"
             >
               <X className="size-6" />
             </button>
+          </DialogClose>
 
+          {src && (
             <motion.div
               key={current.id}
               initial={{ opacity: 0, scale: 0.97 }}
@@ -177,16 +191,16 @@ export function Gallery({
                 className="object-contain"
               />
             </motion.div>
+          )}
 
-            {count > 1 && (
-              <div onClick={(e) => e.stopPropagation()}>
-                <GalleryButton side="left" onClick={() => go(-1)} large />
-                <GalleryButton side="right" onClick={() => go(1)} large />
-              </div>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+          {count > 1 && (
+            <div onClick={(e) => e.stopPropagation()}>
+              <GalleryButton side="left" onClick={() => go(-1)} large />
+              <GalleryButton side="right" onClick={() => go(1)} large />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
@@ -210,7 +224,7 @@ function GalleryButton({
         "absolute top-1/2 grid -translate-y-1/2 place-items-center rounded-full bg-black/40 text-white backdrop-blur transition-all duration-300 hover:bg-black/70",
         large
           ? "size-12"
-          : "size-10 focus-visible:opacity-100 lg:opacity-0 lg:group-hover:opacity-100",
+          : "size-11 focus-visible:opacity-100 lg:opacity-0 lg:group-hover:opacity-100",
         side === "left" ? "left-4" : "right-4",
       )}
     >

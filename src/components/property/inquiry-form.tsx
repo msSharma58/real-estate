@@ -54,7 +54,7 @@ export function InquiryForm({
     if (state.status === "success") {
       formRef.current?.reset();
     } else if (state.status === "error" && !state.fieldErrors) {
-      toast.error(state.message ?? "Something went wrong.");
+      toast.error(state.message ?? "We couldn't send that enquiry. Please call the office.");
     }
   }, [state]);
 

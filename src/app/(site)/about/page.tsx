@@ -13,22 +13,27 @@ export const metadata: Metadata = {
     "Prime Real Estate is a Butwal-based property team handling land, houses and commercial space across Rupandehi and Lumbini province. Visit the office or call us directly.",
 };
 
+/**
+ * These replaced a "5 yrs / 100+ deals / 3 districts" stat row. Those figures
+ * were never confirmed by the team, and a page whose whole argument is "we tell
+ * you the truth about a plot" cannot open with numbers nobody checked.
+ *
+ * Everything here is either verifiable from the listings themselves or was
+ * confirmed as real practice. If the team wants the counts back, they need to
+ * supply the real ones — do not reinstate the placeholders.
+ */
 const MILESTONES = [
   {
-    value: "5 yrs",
-    label: "Working the Butwal market",
-    body: "Long enough to know which wards flood, which roads are getting widened, and which plots are worth waiting for.",
+    label: "One market, properly",
+    body: "Butwal and the surrounding Rupandehi district. We would rather know which wards flood and which roads are getting widened than claim coverage of the whole country.",
   },
   {
-    value: "100+",
-    label: "Deals closed",
-    body: "From two-aana residential plots to highway-facing commercial land. Every one followed up in person.",
+    label: "Land through to commercial",
+    body: "Residential plots by the aana, farmland by the ropani, family houses, apartments, and highway-facing space for business use.",
   },
-  // TODO: confirm the districts you actually cover before launch.
   {
-    value: "3",
-    label: "Districts covered",
-    body: "Rupandehi, Nawalparasi and Kapilvastu — the area we know properly, rather than claiming the whole country.",
+    label: "Papers before price",
+    body: "We read the lalpurja, confirm the plot number and look for disputes before a listing goes up — so the first conversation is about whether it suits you, not whether it is real.",
   },
 ];
 
@@ -36,7 +41,7 @@ export default async function AboutPage() {
   const settings = await getSiteSettings();
 
   return (
-    <div className="pt-18">
+    <div className="pt-[var(--header-h)]">
       <header className="border-b border-border bg-muted/40">
         <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8">
           <p className="eyebrow">About us</p>
@@ -45,10 +50,10 @@ export default async function AboutPage() {
             <span className="text-brand">one market properly</span>.
           </h1>
           <p className="mt-6 max-w-2xl text-[1.0625rem] leading-relaxed text-ink-muted">
-            Prime Real Estate has bought, sold and advised on property in Butwal
-            and the surrounding Rupandehi district since 2021. We are not a
-            franchise and we do not list everything that comes our way — we list
-            what we would be comfortable recommending to family.
+            Prime Real Estate buys, sells and advises on property in Butwal and
+            the surrounding Rupandehi district. We are an independent office, not
+            a franchise, and we do not list everything that comes our way — we
+            list what we would be comfortable recommending to family.
           </p>
         </div>
       </header>
@@ -58,9 +63,10 @@ export default async function AboutPage() {
           {MILESTONES.map((m, i) => (
             <FadeIn key={m.label} delay={i * 0.08}>
               <div className="h-full rounded-2xl border border-border bg-card p-7">
-                <p className="font-display text-4xl font-semibold text-brand">{m.value}</p>
-                <p className="mt-3 font-display text-base font-semibold text-ink">{m.label}</p>
-                <p className="mt-2 text-sm leading-relaxed text-ink-muted">{m.body}</p>
+                <p className="font-display text-2xl font-semibold leading-snug text-ink">
+                  {m.label}
+                </p>
+                <p className="mt-3 text-[0.9375rem] leading-relaxed text-ink-muted">{m.body}</p>
               </div>
             </FadeIn>
           ))}
@@ -94,8 +100,8 @@ export default async function AboutPage() {
                   },
                   {
                     step: "04",
-                    title: "Registration handled end to end",
-                    body: "We walk the paperwork through the land revenue office with you and stay reachable after the deal closes.",
+                    title: "Registration, walked through with you",
+                    body: "We go to the land revenue office with you and stay reachable after the deal closes.",
                   },
                 ].map((s, i) => (
                   <FadeIn key={s.step} delay={i * 0.06}>

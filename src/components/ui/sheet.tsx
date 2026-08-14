@@ -47,6 +47,7 @@ function SheetOverlay({
 
 function SheetContent({
   className,
+  overlayClassName,
   children,
   side = "right",
   showCloseButton = true,
@@ -54,10 +55,12 @@ function SheetContent({
 }: React.ComponentProps<typeof SheetPrimitive.Content> & {
   side?: "top" | "right" | "bottom" | "left"
   showCloseButton?: boolean
+  /** Scrim overrides — a sheet over a content page needs a heavier one than the default. */
+  overlayClassName?: string
 }) {
   return (
     <SheetPortal>
-      <SheetOverlay />
+      <SheetOverlay className={overlayClassName} />
       <SheetPrimitive.Content
         data-slot="sheet-content"
         data-side={side}

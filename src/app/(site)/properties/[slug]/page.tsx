@@ -112,7 +112,7 @@ export default async function PropertyPage({ params }: PageProps<"/properties/[s
   };
 
   return (
-    <div className="pt-18">
+    <div className="pt-[var(--header-h)]">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -215,8 +215,10 @@ export default async function PropertyPage({ params }: PageProps<"/properties/[s
               {area && (
                 <p className="mt-5 border-t border-border pt-5 text-sm text-ink-muted">
                   <span className="font-medium text-ink">{area}</span>
+                  {/* Rounded: this is a derived figure, and "Rs 9,148.94 per sq ft"
+                      implies a precision the asking price does not have. */}
                   {property.price_unit === "total" && property.area
-                    ? ` · ${formatPrice(property.price / property.area)} per ${property.area_unit}`
+                    ? ` · ${formatPrice(Math.round(property.price / property.area))} per ${property.area_unit}`
                     : ""}
                 </p>
               )}
