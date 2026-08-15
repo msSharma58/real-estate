@@ -33,7 +33,7 @@ export function AdminNav({
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-2.5 px-6 py-6">
-        <LogoMark variant="light" className="size-7 shrink-0" />
+        <LogoMark variant="light" className="h-7 w-auto shrink-0" />
         <div className="leading-none">
           <p className="font-display text-[0.9375rem] font-semibold text-white">Prime</p>
           <p className="mt-0.5 text-[0.625rem] uppercase tracking-[0.16em] text-white/45">
