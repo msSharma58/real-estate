@@ -46,7 +46,9 @@ const ASSURANCES = [
   {
     icon: MapPinned,
     title: "Pinned where it actually is",
-    body: "Every listing carries a map pin we placed on site — not an approximate town centre marker. You will find the plot without calling for directions.",
+    // "Every listing" was untrue by the site's own admission — PropertyMap has a
+    // "no map pin set for this property yet" state it falls back to.
+    body: "When a listing carries a map pin, we placed it on site rather than dropping an approximate town-centre marker. Where a pin is still missing, we will send you the location directly.",
   },
   {
     icon: Phone,
@@ -141,7 +143,7 @@ export default async function HomePage() {
                 <span className="text-brand">We keep ours short.</span>
               </>
             }
-            description="Prime Real Estate has worked the Butwal and Rupandehi market since the highway corridor opened up. We list fewer properties than we could, because every one is checked before it goes up."
+            description="Prime Real Estate works the Butwal and Rupandehi market from an office in Butwal. We list fewer properties than we could, because every one is checked before it goes up."
           />
 
           <div className="space-y-8">
@@ -167,7 +169,9 @@ export default async function HomePage() {
         <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8">
           <FadeIn className="flex flex-col items-start justify-between gap-10 lg:flex-row lg:items-center">
             <div className="max-w-xl">
-              <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-brand">
+              {/* brand-soft, not brand: at 11px on ink, full brand red measures
+                  3.90:1 and fails AA. The soft ramp keeps the hue at 9.61:1. */}
+              <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-brand-soft">
                 Talk to us
               </p>
               <h2 className="mt-4 font-display text-3xl font-semibold leading-tight text-white sm:text-[2.5rem]">

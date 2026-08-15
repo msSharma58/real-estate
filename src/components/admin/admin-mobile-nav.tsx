@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
 import {
   Building2,
   ExternalLink,
@@ -18,6 +17,13 @@ import {
 
 import { signOut } from "@/app/actions/auth";
 import { Logo, LogoMark } from "@/components/site/logo";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import type { ProfileRow } from "@/lib/database.types";
 import { cn } from "@/lib/utils";
 
@@ -47,7 +53,7 @@ export function AdminMobileNav({
   const isAdmin = profile?.role === "admin";
 
   return (
-    <>
+    <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
       {/* Top bar — identity and account menu */}
       <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-border bg-background/95 px-4 backdrop-blur lg:hidden">
         <Link href="/admin" className="flex items-center gap-2">
@@ -57,14 +63,15 @@ export function AdminMobileNav({
           </span>
         </Link>
 
-        <button
-          type="button"
-          onClick={() => setMenuOpen(true)}
-          aria-label="Account menu"
-          className="grid size-10 place-items-center rounded-full bg-muted text-ink"
-        >
-          <User className="size-4.5" />
-        </button>
+        <SheetTrigger asChild>
+          <button
+            type="button"
+            aria-label="Account menu"
+            className="grid size-11 place-items-center rounded-full bg-muted text-ink"
+          >
+            <User className="size-4.5" />
+          </button>
+        </SheetTrigger>
       </header>
 
       {/* Bottom tab bar */}
@@ -113,81 +120,70 @@ export function AdminMobileNav({
         </div>
       </nav>
 
-      {/* Account sheet */}
-      <AnimatePresence>
-        {menuOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setMenuOpen(false)}
-              className="fixed inset-0 z-50 bg-black/45 lg:hidden"
-            />
-            <motion.div
-              role="dialog"
-              aria-modal="true"
-              aria-label="Account"
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ type: "spring", damping: 32, stiffness: 320 }}
-              className="fixed inset-x-0 bottom-0 z-50 rounded-t-2xl bg-background p-5 lg:hidden"
-              style={{ paddingBottom: "calc(1.25rem + env(safe-area-inset-bottom))" }}
-            >
-              <div className="flex items-start justify-between">
-                <div className="min-w-0">
-                  <Logo href="/admin" />
-                  {profile && (
-                    <p className="mt-3 truncate text-sm text-ink-muted">
-                      {profile.name} · <span className="capitalize">{profile.role}</span>
-                    </p>
-                  )}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setMenuOpen(false)}
-                  aria-label="Close"
-                  className="grid size-10 shrink-0 place-items-center rounded-full text-ink-muted hover:bg-muted"
-                >
-                  <X className="size-5" />
-                </button>
-              </div>
+      {/* Account sheet — Radix handles focus trap, Escape and scroll lock, which
+          the hand-rolled version claimed via aria-modal but never implemented. */}
+      <SheetContent
+        side="bottom"
+        showCloseButton={false}
+        aria-describedby={undefined}
+        overlayClassName="bg-black/45 lg:hidden"
+        className="gap-0 rounded-t-2xl border-t-0 bg-background p-5 lg:hidden"
+        style={{ paddingBottom: "calc(1.25rem + env(safe-area-inset-bottom))" }}
+      >
+        <SheetTitle className="sr-only">Account</SheetTitle>
 
-              <div className="mt-5 space-y-1 border-t border-border pt-4">
-                {isAdmin && (
-                  <Link
-                    href="/admin/settings"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex min-h-12 items-center gap-3 rounded-lg px-3 text-[0.9375rem] font-medium text-ink hover:bg-muted"
-                  >
-                    <Settings className="size-4.5 text-ink-muted" />
-                    Site settings
-                  </Link>
-                )}
-                <a
-                  href="/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex min-h-12 items-center gap-3 rounded-lg px-3 text-[0.9375rem] font-medium text-ink hover:bg-muted"
-                >
-                  <ExternalLink className="size-4.5 text-ink-muted" />
-                  View public site
-                </a>
-                <form action={signOut}>
-                  <button
-                    type="submit"
-                    className="flex min-h-12 w-full items-center gap-3 rounded-lg px-3 text-[0.9375rem] font-medium text-destructive hover:bg-destructive/8"
-                  >
-                    <LogOut className="size-4.5" />
-                    Sign out
-                  </button>
-                </form>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-    </>
+        <div className="flex items-start justify-between">
+          <div className="min-w-0">
+            <Logo href="/admin" />
+            {profile && (
+              <p className="mt-3 truncate text-sm text-ink-muted">
+                {profile.name} · <span className="capitalize">{profile.role}</span>
+              </p>
+            )}
+          </div>
+          <SheetClose asChild>
+            <button
+              type="button"
+              aria-label="Close"
+              className="grid size-11 shrink-0 place-items-center rounded-full text-ink-muted hover:bg-muted"
+            >
+              <X className="size-5" />
+            </button>
+          </SheetClose>
+        </div>
+
+        <div className="mt-5 space-y-1 border-t border-border pt-4">
+          {isAdmin && (
+            <SheetClose asChild>
+              <Link
+                href="/admin/settings"
+                className="flex min-h-12 items-center gap-3 rounded-lg px-3 text-[0.9375rem] font-medium text-ink hover:bg-muted"
+              >
+                <Settings className="size-4.5 text-ink-muted" />
+                Site settings
+              </Link>
+            </SheetClose>
+          )}
+          <a
+            href="/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex min-h-12 items-center gap-3 rounded-lg px-3 text-[0.9375rem] font-medium text-ink hover:bg-muted"
+          >
+            <ExternalLink className="size-4.5 text-ink-muted" />
+            View public site
+          </a>
+          <form action={signOut}>
+            <button
+              type="submit"
+              className="flex min-h-12 w-full items-center gap-3 rounded-lg px-3 text-[0.9375rem] font-medium text-destructive hover:bg-destructive/8"
+            >
+              <LogOut className="size-4.5" />
+              Sign out
+            </button>
+          </form>
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 }

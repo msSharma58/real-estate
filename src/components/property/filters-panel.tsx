@@ -2,13 +2,20 @@
 
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
 import { Loader2, SlidersHorizontal, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import {
   Select,
   SelectContent,
@@ -263,7 +270,14 @@ function ClearButton() {
   );
 }
 
-/** Mobile: the same fields, slid in from the right. */
+/**
+ * Mobile: the same fields, slid in from the right.
+ *
+ * Built on the Radix sheet rather than hand-rolled, so focus moves into the
+ * panel, Tab stays inside it, Escape closes, the page behind is inert to
+ * assistive tech, and focus returns to the Filters button on close. The
+ * previous version declared `aria-modal="true"` while none of that was true.
+ */
 export function FiltersDrawer() {
   const [open, setOpen] = useState(false);
   const { searchParams } = useFilterParams();
@@ -273,69 +287,47 @@ export function FiltersDrawer() {
       searchParams.get(k),
     ).length;
 
-  useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [open]);
-
   return (
-    <>
-      <Button
-        variant="outline"
-        onClick={() => setOpen(true)}
-        className="rounded-full lg:hidden"
-      >
-        <SlidersHorizontal className="size-4" />
-        Filters
-        {activeCount > 0 && (
-          <span className="ml-1 grid size-5 place-items-center rounded-full bg-brand text-[0.6875rem] font-semibold text-brand-foreground">
-            {activeCount}
-          </span>
-        )}
-      </Button>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button variant="outline" className="rounded-full lg:hidden">
+          <SlidersHorizontal className="size-4" />
+          Filters
+          {activeCount > 0 && (
+            <span className="ml-1 grid size-5 place-items-center rounded-full bg-brand text-[0.6875rem] font-semibold text-brand-foreground">
+              {activeCount}
+            </span>
+          )}
+        </Button>
+      </SheetTrigger>
 
-      <AnimatePresence>
-        {open && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.25 }}
-              onClick={() => setOpen(false)}
-              className="fixed inset-0 z-[60] bg-black/45 backdrop-blur-[2px] lg:hidden"
-            />
-            <motion.div
-              role="dialog"
-              aria-modal="true"
-              aria-label="Filters"
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 30, stiffness: 280 }}
-              className="fixed inset-y-0 right-0 z-[70] flex w-[min(22rem,90vw)] flex-col bg-background shadow-2xl lg:hidden"
+      <SheetContent
+        side="right"
+        showCloseButton={false}
+        // The title names the panel; there is no summary worth announcing after it.
+        aria-describedby={undefined}
+        overlayClassName="z-[60] bg-black/45 backdrop-blur-[2px] lg:hidden"
+        className="z-[70] w-[min(22rem,90vw)] gap-0 border-l-0 bg-background p-0 shadow-2xl sm:max-w-none lg:hidden"
+      >
+        <SheetHeader className="flex-row items-center justify-between gap-4 space-y-0 border-b border-border px-6 py-5">
+          <SheetTitle className="font-display text-lg font-semibold text-ink">
+            Filters
+          </SheetTitle>
+          <SheetClose asChild>
+            <button
+              type="button"
+              aria-label="Close filters"
+              className="grid size-11 place-items-center rounded-full text-ink-muted transition-colors hover:bg-muted hover:text-ink"
             >
-              <div className="flex items-center justify-between border-b border-border px-6 py-5">
-                <h2 className="font-display text-lg font-semibold text-ink">Filters</h2>
-                <button
-                  type="button"
-                  onClick={() => setOpen(false)}
-                  aria-label="Close filters"
-                  className="grid size-9 place-items-center rounded-full text-ink-muted transition-colors hover:bg-muted hover:text-ink"
-                >
-                  <X className="size-5" />
-                </button>
-              </div>
-              <div className="flex-1 overflow-y-auto px-6 py-6">
-                <FilterFields onDone={() => setOpen(false)} />
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-    </>
+              <X className="size-5" />
+            </button>
+          </SheetClose>
+        </SheetHeader>
+        <div className="flex-1 overflow-y-auto px-6 py-6">
+          <FilterFields onDone={() => setOpen(false)} />
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 }
 
@@ -358,6 +350,54 @@ export function SortSelect() {
         ))}
       </SelectContent>
     </Select>
+  );
+}
+
+/**
+ * Announces that filtering changed the results.
+ *
+ * Filters rewrite the URL and the grid swaps in silently — a sighted user sees
+ * the count tick from 9 to 3, a screen-reader user got nothing at all.
+ *
+ * This deliberately sits *outside* the keyed `<Suspense>` that wraps the
+ * results: a live region inserted into the DOM at the same moment its content
+ * changes is not reliably announced, so the region has to outlive the thing it
+ * is reporting on. It reports the filter state rather than the count for the
+ * same reason — the count is only known inside the boundary that gets torn
+ * down, while the URL is known out here.
+ */
+export function ResultsStatus() {
+  const { searchParams, pending } = useFilterParams();
+
+  // Derived during render, not held in state: the message is a pure function of
+  // the URL and the transition. A live region announces *changes* to its
+  // contents, so the summary rendered on first paint stays silent and only the
+  // flip in and out of `pending` is spoken.
+  let message: string;
+  if (pending) {
+    message = "Updating results…";
+  } else {
+    const types = searchParams
+      .getAll("type")
+      .map((t) => PROPERTY_TYPES.find((p) => p.value === t)?.plural ?? t);
+    const q = searchParams.get("q");
+    const parts = [
+      types.length ? types.join(", ") : null,
+      q ? `matching “${q}”` : null,
+      searchParams.get("minPrice") || searchParams.get("maxPrice") ? "price filtered" : null,
+      searchParams.get("minArea") || searchParams.get("maxArea") ? "area filtered" : null,
+      searchParams.get("showSold") === "1" ? "including sold" : null,
+    ].filter(Boolean);
+
+    message = parts.length
+      ? `Results updated. Showing ${parts.join(", ")}.`
+      : "Results updated. Showing all properties.";
+  }
+
+  return (
+    <p role="status" aria-live="polite" className="sr-only">
+      {message}
+    </p>
   );
 }
 

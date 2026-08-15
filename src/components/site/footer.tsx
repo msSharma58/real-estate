@@ -41,15 +41,18 @@ export function Footer({ settings }: { settings: SiteSettings }) {
 
           {COLUMNS.map((col) => (
             <div key={col.title}>
-              <h3 className="text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-white/40">
+              <h3 className="text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-white/55">
                 {col.title}
               </h3>
               <ul className="mt-5 space-y-3">
                 {col.links.map((link) => (
                   <li key={link.href + link.label}>
+                    {/* `-my-1 py-1` buys 16px of tap area on a 17px-tall link
+                        without moving anything: the padding grows the hit box,
+                        the negative margin gives the layout back. */}
                     <Link
                       href={link.href}
-                      className="text-sm text-white/70 transition-colors hover:text-white"
+                      className="-my-1 inline-block py-1 text-sm text-white/70 transition-colors hover:text-white"
                     >
                       {link.label}
                     </Link>
@@ -60,7 +63,7 @@ export function Footer({ settings }: { settings: SiteSettings }) {
           ))}
 
           <div>
-            <h3 className="text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-white/40">
+            <h3 className="text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-white/55">
               Get in touch
             </h3>
             <ul className="mt-5 space-y-4 text-sm">
@@ -98,7 +101,7 @@ export function Footer({ settings }: { settings: SiteSettings }) {
           </div>
         </div>
 
-        <div className="mt-14 flex flex-col gap-3 border-t border-white/10 pt-7 text-xs text-white/40 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-14 flex flex-col gap-3 border-t border-white/10 pt-7 text-xs text-white/55 sm:flex-row sm:items-center sm:justify-between">
           <p>
             © {new Date().getFullYear()} {settings.name}. All rights reserved.
           </p>

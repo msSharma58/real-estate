@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { SITE } from "@/lib/constants";
 import { notifyTeamOfInquiry } from "@/lib/notify";
+import { getSiteSettings } from "@/lib/queries";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
@@ -55,10 +56,14 @@ export async function submitInquiry(
 
   const { propertyId, propertyTitle, propertySlug, name, phone, email, message } = parsed.data;
 
+  // Both failure paths below name the phone number rather than saying "call us".
+  // Someone whose enquiry just failed should not have to go and find it.
+  const settings = await getSiteSettings();
+
   if (!isSupabaseConfigured) {
     return {
       status: "error",
-      message: "The enquiry form isn't connected yet. Please call us instead.",
+      message: `This form isn't accepting enquiries yet. Call ${settings.phone} and we'll pick it up from there.`,
     };
   }
 
@@ -75,7 +80,7 @@ export async function submitInquiry(
     console.error("submitInquiry:", error.message);
     return {
       status: "error",
-      message: "Something went wrong saving your enquiry. Please call us instead.",
+      message: `We couldn't save your enquiry just now — nothing was sent. Try again in a moment, or call ${settings.phone} and we'll take the details down.`,
     };
   }
 
@@ -95,6 +100,7 @@ export async function submitInquiry(
 
   return {
     status: "success",
-    message: "Thank you — we've got your details and will call you shortly.",
+    // Matches the promise the form makes above the button. One claim, one wording.
+    message: `Thank you — we have your number and the agent handling this listing will call you back, usually the same day. If it's urgent, ring ${settings.phone}.`,
   };
 }
