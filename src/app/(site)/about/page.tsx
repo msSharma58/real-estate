@@ -24,14 +24,17 @@ export const metadata: Metadata = {
  */
 const MILESTONES = [
   {
+    value: "5 yrs",
     label: "One market, properly",
     body: "Butwal and the surrounding Rupandehi district. We would rather know which wards flood and which roads are getting widened than claim coverage of the whole country.",
   },
   {
+    value: "100+ deals",
     label: "Land through to commercial",
     body: "Residential plots by the aana, farmland by the ropani, family houses, apartments, and highway-facing space for business use.",
   },
   {
+    value: "3 districts",
     label: "Papers before price",
     body: "We read the lalpurja, confirm the plot number and look for disputes before a listing goes up — so the first conversation is about whether it suits you, not whether it is real.",
   },
@@ -46,8 +49,8 @@ export default async function AboutPage() {
         <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8">
           <p className="eyebrow">About us</p>
           <h1 className="mt-3 max-w-3xl font-display text-4xl font-semibold leading-[1.1] text-ink sm:text-[3.25rem]">
-            A small team that knows{" "}
-            <span className="text-brand">one market properly</span>.
+            Your trusted Real Estate{" "}
+            <span className="text-brand">partner</span>.
           </h1>
           <p className="mt-6 max-w-2xl text-[1.0625rem] leading-relaxed text-ink-muted">
             Prime Real Estate buys, sells and advises on property in Butwal and
@@ -63,10 +66,9 @@ export default async function AboutPage() {
           {MILESTONES.map((m, i) => (
             <FadeIn key={m.label} delay={i * 0.08}>
               <div className="h-full rounded-2xl border border-border bg-card p-7">
-                <p className="font-display text-2xl font-semibold leading-snug text-ink">
-                  {m.label}
-                </p>
-                <p className="mt-3 text-[0.9375rem] leading-relaxed text-ink-muted">{m.body}</p>
+              <p className="font-display text-4xl font-semibold text-brand">{m.value}</p>
+                <p className="mt-3 font-display text-base font-semibold text-ink">{m.label}</p>
+                <p className="mt-2 text-sm leading-relaxed text-ink-muted">{m.body}</p>
               </div>
             </FadeIn>
           ))}
@@ -189,8 +191,12 @@ export default async function AboutPage() {
             eyebrow="Contact"
             title="Tell us what you're looking for"
             description="Fill this in and we will call you back — or skip the form entirely and phone the office. Both reach the same people."
+            className="self-start"
           />
-          <InquiryForm />
+          <InquiryForm
+            heading="Get in touch"
+            description="Leave your number and a member of our team will call you back — usually the same day."
+          />
         </div>
       </section>
     </div>

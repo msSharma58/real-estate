@@ -40,11 +40,15 @@ export function InquiryForm({
   propertyId,
   propertySlug,
   propertyTitle,
+  heading = "Interested in this property?",
+  description = "Leave your number and the agent handling this listing will call you back — usually the same day.",
   className,
 }: {
   propertyId?: string;
   propertySlug?: string | null;
   propertyTitle?: string;
+  heading?: string;
+  description?: string;
   className?: string;
 }) {
   const [state, formAction] = useActionState(submitInquiry, INITIAL);
@@ -87,11 +91,10 @@ export function InquiryForm({
             transition={{ duration: 0.25 }}
           >
             <h3 className="font-display text-lg font-semibold text-ink">
-              Interested in this property?
+              {heading}
             </h3>
             <p className="mt-1.5 text-sm leading-relaxed text-ink-muted">
-              Leave your number and the agent handling this listing will call you
-              back — usually the same day.
+              {description}
             </p>
 
             <form ref={formRef} action={formAction} className="mt-6 space-y-4">
